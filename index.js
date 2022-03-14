@@ -30,7 +30,7 @@ const onClickButton = async () => {
   }); 
   let result = await resp.json();
   console.log('result', result)
-  // allTask = result.data;  
+  allTask = result.data;  
   localStorage.setItem('tasks', JSON.stringify(allTask));
   inputText = '';
   input.value = '';
@@ -79,7 +79,7 @@ const render = () => {
     deleteImg.className = 'icons';
     deleteImg.src = 'img/delete.png';
     container.appendChild(deleteImg);
-    deleteImg.onclick = () =>  EraseTask(index); 
+    deleteImg.onclick = () =>  EraseTask(item.id); 
     if (checkbox.checked === true) {      
       container.removeChild(editImg);
     };  
@@ -92,8 +92,12 @@ const onChangeCheckBox = (index) => {
   render();
 };
 
-const EraseTask = (index) => {
-  allTask.splice(index, 1)
+const EraseTask = async(index) => {
+  allTask.splice(index, 1);
+  const resp = await fetch(`http://localhost:8000/deleteTask/?id=${index}`, {
+    method: 'DELETE', 
+  });
+  
   localStorage.setItem('tasks', JSON.stringify(allTask));  
   render();
 };
@@ -103,37 +107,49 @@ const editText = (index, container, item) => {    //стирает весь ко
     container.removeChild(container.firstChild);
   };
 
-const input = document.createElement('input');
-input.type = 'text';
-input.value = item.text;
-input.id = `input-${index}`;  
-input.className = 'text-input';
-container.appendChild(input);
-const cancelImg = document.createElement('img');
-cancelImg.src = 'img/decline.png';
-cancelImg.className = 'icons';
-container.appendChild(cancelImg);
-cancelImg.onclick = () => revoke();
-const okImg = document.createElement('img');
-okImg.src = 'img/okey.png';
-okImg.className = 'icons';
-okImg.onclick = () => changeValue(index);
-container.appendChild(okImg);
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.value = item.text;
+  input.id = `input-${index}`;  
+  input.className = 'text-input';
+  container.appendChild(input);
+  const cancelImg = document.createElement('img');
+  cancelImg.src = 'img/decline.png';
+  cancelImg.className = 'icons';
+  container.appendChild(cancelImg);
+  cancelImg.onclick = () => cancel();
+  const saveImg = document.createElement('img');
+  saveImg.src = 'img/okey.png';
+  saveImg.className = 'icons';
+  saveImg.onclick = () => changeValue(index, item.id);
+  container.appendChild(saveImg);
 }
 
-const changeValue = (index) => {
-  const temp = document.getElementById(`input-${index}`)
-  allTask[index].text = temp.value;
+const changeValue = async(index, item) => {                 //тут
+  const temp = document.getElementById(`input-${index}`);
+  allTask[index].text = temp.value;     
+  const resp = await fetch(`http://localhost:8000/updateTask`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json;charset=utf-8',
+      'Access-Control-Allow-Origin': '*',        
+    }, body: JSON.stringify( {
+      id: item,      
+      text: temp.value,                
+    })    
+  });     
+  const result = await resp.json();
+  allTask = result.data;
   localStorage.setItem('tasks', JSON.stringify(allTask));  
   render();
 }
 
-const revoke = () => {
+const cancel = () => {
   render();
 }
 
 const deleteAllTasks = () => { 
   allTask = [];
-  localStorage.clear()
+  localStorage.clear();
   render();  
 }
