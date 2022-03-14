@@ -2,17 +2,35 @@ let allTask = JSON.parse(localStorage.getItem('tasks')) || [];
 let inputText = '';
 let input = null;
 
-window.onload =  init = ()  => {
+ window.onload = init = async()  => {
   input = document.getElementById('input-text');
-  input.addEventListener('change', updateValue); 
+  input.addEventListener('change', updateValue);
+  const resp = await fetch('http://localhost:8000/allTasks', {
+    method: 'GET'
+  }); 
+  let result = await resp.json();
+  allTask = result.data;
   render();  
 }
 
-const onClickButton = () => {
+const onClickButton = async () => {
   allTask.push( {
     text: inputText,
-    isCheck: false
+    isCheck: false    
   });
+  const resp = await fetch('http://localhost:8000/createTask', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json;charset=utf-8',
+      'Access-Control-Allow-Origin': '*'
+    }, body: JSON.stringify( {
+       text: inputText,
+       isCheck: false
+    })
+  }); 
+  let result = await resp.json();
+  console.log('result', result)
+  // allTask = result.data;  
   localStorage.setItem('tasks', JSON.stringify(allTask));
   inputText = '';
   input.value = '';
@@ -57,33 +75,33 @@ const render = () => {
     editImg.onclick = () => {
       editText(index, container, item);
     } 
-    const EraseImg = document.createElement('img');
-    EraseImg.className = 'icons';
-    EraseImg.src = 'img/delete.png'
-    container.appendChild(EraseImg);
-    EraseImg.onclick = () =>  EraseTask(index); 
+    const deleteImg = document.createElement('img');
+    deleteImg.className = 'icons';
+    deleteImg.src = 'img/delete.png';
+    container.appendChild(deleteImg);
+    deleteImg.onclick = () =>  EraseTask(index); 
     if (checkbox.checked === true) {      
       container.removeChild(editImg);
-    }  
-  })
-}
+    };  
+  });
+};
 
 const onChangeCheckBox = (index) => {
   allTask[index].isCheck = !allTask[index].isCheck; 
   localStorage.setItem('tasks', JSON.stringify(allTask)); 
   render();
-}
+};
 
 const EraseTask = (index) => {
   allTask.splice(index, 1)
   localStorage.setItem('tasks', JSON.stringify(allTask));  
   render();
-}
+};
 
 const editText = (index, container, item) => {    //стирает весь контейнер при редактировании. 
   while(container.firstChild) {
     container.removeChild(container.firstChild);
-  }
+  };
 
 const input = document.createElement('input');
 input.type = 'text';
@@ -102,6 +120,7 @@ okImg.className = 'icons';
 okImg.onclick = () => changeValue(index);
 container.appendChild(okImg);
 }
+
 const changeValue = (index) => {
   const temp = document.getElementById(`input-${index}`)
   allTask[index].text = temp.value;
