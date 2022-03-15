@@ -1,40 +1,40 @@
-let allTask = JSON.parse(localStorage.getItem('tasks')) || [];
+let allTask = [];
 let inputText = '';
 let input = null;
+const url = 'http://localhost:8000';
 
  window.onload = init = async()  => {
   input = document.getElementById('input-text');
   input.addEventListener('change', updateValue);
-  const resp = await fetch('http://localhost:8000/allTasks', {
+  const resp = await fetch(url + '/allTasks', {
     method: 'GET'
   }); 
   let result = await resp.json();
   allTask = result.data;
   render();  
-}
+};
 
 const onClickButton = async () => {
   allTask.push( {
     text: inputText,
     isCheck: false    
   });
-  const resp = await fetch('http://localhost:8000/createTask', {
+  const resp = await fetch(url + '/createTask', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json;charset=utf-8',
       'Access-Control-Allow-Origin': '*'
-    }, body: JSON.stringify( {
+    }, body: JSON.stringify({
        text: inputText,
        isCheck: false
     })
   }); 
-  let result = await resp.json();
-  console.log('result', result)
+  let result = await resp.json();  
   allTask = result.data;  
-  localStorage.setItem('tasks', JSON.stringify(allTask));
+  // localStorage.setItem('tasks', JSON.stringify(allTask));
   inputText = '';
   input.value = '';
-  render();
+  render()
 } 
 
 const updateValue =  (event) => {
@@ -48,7 +48,7 @@ const render = () => {
     content.removeChild(content.firstChild);
   }
   
-  allTask.sort(a => a.isCheck ?  1 : -1) 
+  allTask.sort(a => a.isCheck ?  1 : -1)  
   .map((item, index) => {
     const { isCheck, text } = item    
     const container = document.createElement('div');
@@ -74,12 +74,13 @@ const render = () => {
     container.appendChild(editImg);
     editImg.onclick = () => {
       editText(index, container, item);
-    } 
+    };
+
     const deleteImg = document.createElement('img');
     deleteImg.className = 'icons';
     deleteImg.src = 'img/delete.png';
     container.appendChild(deleteImg);
-    deleteImg.onclick = () =>  EraseTask(item.id); 
+    deleteImg.onclick = () =>  deleteTask(item.id); 
     if (checkbox.checked === true) {      
       container.removeChild(editImg);
     };  
@@ -92,7 +93,7 @@ const onChangeCheckBox = (index) => {
   render();
 };
 
-const EraseTask = async(index) => {
+const deleteTask = async(index) => {
   allTask.splice(index, 1);
   const resp = await fetch(`http://localhost:8000/deleteTask/?id=${index}`, {
     method: 'DELETE', 
@@ -125,7 +126,7 @@ const editText = (index, container, item) => {    //стирает весь ко
   container.appendChild(saveImg);
 }
 
-const changeValue = async(index, item) => {                 //тут
+const changeValue = async(index, item) => {                 
   const temp = document.getElementById(`input-${index}`);
   allTask[index].text = temp.value;     
   const resp = await fetch(`http://localhost:8000/updateTask`, {
