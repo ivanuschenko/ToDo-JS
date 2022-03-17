@@ -6,9 +6,9 @@ const url = 'http://localhost:8000';
  window.onload = init = async()  => {
   input = document.getElementById('input-text');
   input.addEventListener('change', updateValue);
-  const resp = await fetch(url + '/allTasks', {
-    method: 'GET'
-  }); 
+  const resp = await fetch(`${url}/allTasks`, {
+    method: 'GET',  
+  });  
   let result = await resp.json();
   allTask = result.data;
   render();  
@@ -19,21 +19,18 @@ const onClickButton = async () => {
     text: inputText,
     isCheck: false    
   });
-  const resp = await fetch(url + '/createTask', {
+  const resp = await fetch(`${url}/createTask`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json;charset=utf-8',
       'Access-Control-Allow-Origin': '*'
     }, body: JSON.stringify({
        text: inputText,
-       isCheck: false
+       isCheck: false,             
     })
-  }); 
-  let result = await resp.json();  
-  allTask = result.data;  
-  // localStorage.setItem('tasks', JSON.stringify(allTask));
+  });
   inputText = '';
-  input.value = '';
+  input.value = '';  
   render()
 } 
 
@@ -48,11 +45,11 @@ const render = () => {
     content.removeChild(content.firstChild);
   }
   
-  allTask.sort(a => a.isCheck ?  1 : -1)  
-  .map((item, index) => {
-    const { isCheck, text } = item    
+  allTask.sort(elem => elem.isCheck ?  1 : -1)  
+  allTask.map((item, index) => {
+    const { isCheck, text, _id } = item    
     const container = document.createElement('div');
-    container.id = `task-${index}`;
+    container.id = `task-${index}`;    
     container.className = 'container-task';
     content.appendChild(container);
     const checkbox = document.createElement('input');
@@ -73,14 +70,14 @@ const render = () => {
     editImg.src = 'img/edit.png';
     container.appendChild(editImg);
     editImg.onclick = () => {
-      editText(index, container, item);
+      editText(index, container, item, _id);
     };
 
     const deleteImg = document.createElement('img');
     deleteImg.className = 'icons';
     deleteImg.src = 'img/delete.png';
-    container.appendChild(deleteImg);
-    deleteImg.onclick = () =>  deleteTask(item.id); 
+    container.appendChild(deleteImg);     
+    deleteImg.onclick = () =>  deleteTask(_id); 
     if (checkbox.checked === true) {      
       container.removeChild(editImg);
     };  
@@ -88,22 +85,19 @@ const render = () => {
 };
 
 const onChangeCheckBox = (index) => {
-  allTask[index].isCheck = !allTask[index].isCheck; 
-  localStorage.setItem('tasks', JSON.stringify(allTask)); 
+  allTask[index].isCheck = !allTask[index].isCheck;   
   render();
 };
 
-const deleteTask = async(index) => {
-  allTask.splice(index, 1);
-  const resp = await fetch(`http://localhost:8000/deleteTask/?id=${index}`, {
+const deleteTask = async (index) => {  
+  allTask.splice(index, 1);  
+  const resp = await fetch(`${url}/deleteTask/?_id=${index}`, {
     method: 'DELETE', 
-  });
-  
-  localStorage.setItem('tasks', JSON.stringify(allTask));  
+  });        
   render();
 };
 
-const editText = (index, container, item) => {    //стирает весь контейнер при редактировании. 
+const editText = (index, container, item, id) => {    //стирает весь контейнер при редактировании. 
   while(container.firstChild) {
     container.removeChild(container.firstChild);
   };
@@ -122,26 +116,24 @@ const editText = (index, container, item) => {    //стирает весь ко
   const saveImg = document.createElement('img');
   saveImg.src = 'img/okey.png';
   saveImg.className = 'icons';
-  saveImg.onclick = () => changeValue(index, item.id);
+  saveImg.onclick = () => changeValue(index, id);
   container.appendChild(saveImg);
 }
 
-const changeValue = async(index, item) => {                 
-  const temp = document.getElementById(`input-${index}`);
-  allTask[index].text = temp.value;     
-  const resp = await fetch(`http://localhost:8000/updateTask`, {
+const changeValue = async(index, item) => {
+  const temp = document.getElementById(`input-${index}`);      
+  allTask[index].text = temp.value;
+  console.log(allTask[index].text);     
+  const resp = await fetch(`${url}/updateTask`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json;charset=utf-8',
       'Access-Control-Allow-Origin': '*',        
     }, body: JSON.stringify( {
-      id: item,      
+      _id: item,            
       text: temp.value,                
     })    
-  });     
-  const result = await resp.json();
-  allTask = result.data;
-  localStorage.setItem('tasks', JSON.stringify(allTask));  
+  }); 
   render();
 }
 
