@@ -141,8 +141,11 @@ const cancel = () => {
   render();
 }
 
-const deleteAllTasks = () => { 
+const deleteAllTasks = async () => { 
   allTask = [];
-  localStorage.clear();
+  const resp = await fetch(`${url}/deleteAll`, {
+    method: 'DELETE', 
+  });     
+  
   render();  
 }
