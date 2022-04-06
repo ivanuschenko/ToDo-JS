@@ -3,6 +3,7 @@ body {
   text-align: center;
   font-family: 'Roboto', sans-serif;
 }
+
 .main {
   margin: 0 auto;
   display: flex;
@@ -12,14 +13,17 @@ body {
   border-radius: 10px;
   background-color: rgb(90, 90, 231);
 }
+
 .text-task {
   padding: 5px 10px;
   color:black;
 }
+
 .done-task {
   color: gray;
   text-decoration: line-through;
 }
+
 .container-task {
   border-radius: 5px;
   width: 100px;
@@ -35,6 +39,7 @@ body {
   cursor: progress;
   padding: 0 0 0 1rem;
 }
+
 #content {    
   margin-top: 10px;
   width: 100%;
@@ -43,9 +48,11 @@ body {
   justify-items: center;
   grid-gap: 40px;  
 }
+
 .text-input {
   width: 100px;
 }
+
 .delete-all-task {
   margin-top: 10px;  
   width: 25px;

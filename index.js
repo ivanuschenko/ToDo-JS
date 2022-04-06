@@ -25,7 +25,7 @@ const onClickButton = async () => {
        isCheck: false,             
     })
   });
-  let response = await resp.json();
+  const response = await resp.json();
   allTask = response;
   inputText = '';
   input.value = '';  
@@ -56,8 +56,7 @@ const render = () => {
     checkbox.checked = isCheck;
     checkbox.className = 'checkbox';
     checkbox.onchange =  () => {
-      onChangeCheckBox(item);
-      
+      onChangeCheckBox(item);      
     };   
     container.appendChild(checkbox); 
     const textValue = document.createElement('p');    
@@ -70,9 +69,8 @@ const render = () => {
     editImg.src = 'img/edit.png';
     container.appendChild(editImg);
     editImg.onclick = () => {
-      editText(_id, container, item);
+      editText(container, item);
     };
-
     const deleteImg = document.createElement('img');
     deleteImg.className = 'icons';
     deleteImg.src = 'img/delete.png';
@@ -98,13 +96,14 @@ const deleteTask = async (_id) => {
   render();
 };
 
-const editText = (_id, container, item) => {    //стирает весь контейнер при редактировании. 
+const editText = (container, item) => {    //стирает весь контейнер при редактировании. 
+  const {_id, text, isCheck} = item
   while(container.firstChild) {
     container.removeChild(container.firstChild);
   };
   const input = document.createElement('input');
   input.type = 'text';
-  input.value = item.text;
+  input.value = text;
   input.id = `input-${_id}`;  
   input.className = 'text-input';
   container.appendChild(input);
